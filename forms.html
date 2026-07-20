@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="nb">
+<head>
+  <meta charset="utf-8">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Skjemaregistrering</title>
+</head>
+<body>
+  <!-- Statisk registreringsskjema som gjør Netlify Forms-detektering robust. -->
+  <form name="kontakt" method="POST" action="/takk/index.html" netlify data-netlify="true" data-netlify-honeypot="bot-field" hidden>
+    <input type="hidden" name="form-name" value="kontakt">
+    <input name="bot-field">
+    <input name="navn">
+    <input name="telefon">
+    <input name="epost" type="email">
+    <textarea name="melding"></textarea>
+  </form>
+</body>
+</html>

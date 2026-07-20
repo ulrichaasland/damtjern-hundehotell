@@ -18,3 +18,8 @@ Netlify deploys automatically from the `main` branch.
 - `/takk/` – confirmation page for the contact form
 
 All images and video belong under `/assets/`.
+
+## Skjemafiks v2.2
+- Kontaktskjemaet sender til `/takk/index.html`.
+- Netlify Forms registreres også via `forms.html`.
+- Alle redirect-regler for `/takk` er fjernet for å unngå løkker.
