@@ -7,6 +7,10 @@
   const BOOKING_HOST = 'damtjern-os.onrender.com';
   const LINKED_DOMAINS = ['damtjern.no', BOOKING_HOST];
   const PRODUCTION_HOSTS = new Set(['damtjern.no', 'www.damtjern.no', BOOKING_HOST]);
+  const ATTRIBUTION_PARAMS = [
+    'gclid', 'gbraid', 'wbraid',
+    'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content',
+  ];
   const GRANTED = 'granted';
   const DENIED = 'denied';
 
@@ -87,13 +91,34 @@
     document.head.appendChild(script);
   }
 
+  function attributionFromLandingPage() {
+    if (decision !== GRANTED) return new URLSearchParams();
+    try {
+      const landing = new URL(window.location.href);
+      const attribution = new URLSearchParams();
+      ATTRIBUTION_PARAMS.forEach((name) => {
+        const value = landing.searchParams.get(name);
+        if (value) attribution.set(name, value);
+      });
+      return attribution;
+    } catch (error) {
+      return new URLSearchParams();
+    }
+  }
+
   function syncBookingLinks() {
+    const attribution = attributionFromLandingPage();
     document.querySelectorAll('a[href]').forEach((link) => {
       try {
         const url = new URL(link.href, window.location.href);
         if (url.hostname !== BOOKING_HOST) return;
         if (decision) url.searchParams.set(CONSENT_PARAM, decision);
         else url.searchParams.delete(CONSENT_PARAM);
+
+        ATTRIBUTION_PARAMS.forEach((name) => url.searchParams.delete(name));
+        if (decision === GRANTED) {
+          attribution.forEach((value, name) => url.searchParams.set(name, value));
+        }
         link.href = url.toString();
       } catch (error) {
         // Ignore malformed or non-HTTP links.
