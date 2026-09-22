@@ -1,0 +1,2 @@
+# Canonical host: redirect www.damtjern.no to damtjern.no
+https://www.damtjern.no/* https://damtjern.no/:splat 301!
