@@ -29,6 +29,7 @@
 
   let decision = readIncomingDecision() || readStoredDecision();
   let tagStarted = false;
+  let visitorTagStarted = false;
 
   function validDecision(value) {
     return value === GRANTED || value === DENIED ? value : null;
@@ -91,6 +92,29 @@
     document.head.appendChild(script);
   }
 
+  function visitSession() {
+    try {
+      const key = 'damtjern_visit_session_v1';
+      let id = window.sessionStorage.getItem(key);
+      if (!id || !/^[a-f0-9]{32}$/.test(id)) {
+        id = Array.from(crypto.getRandomValues(new Uint8Array(16)), b => b.toString(16).padStart(2, '0')).join('');
+        window.sessionStorage.setItem(key, id);
+      }
+      return id;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  function startVisitorTag() {
+    if (visitorTagStarted || !PRODUCTION_HOSTS.has(window.location.hostname)) return;
+    visitorTagStarted = true;
+    const script = document.createElement('script');
+    script.async = true;
+    script.src = 'https://damtjern-os.onrender.com/analytics/visitor.js';
+    document.head.appendChild(script);
+  }
+
   function attributionFromLandingPage() {
     if (decision !== GRANTED) return new URLSearchParams();
     try {
@@ -114,6 +138,9 @@
         if (url.hostname !== BOOKING_HOST) return;
         if (decision) url.searchParams.set(CONSENT_PARAM, decision);
         else url.searchParams.delete(CONSENT_PARAM);
+        const visit = decision === GRANTED ? visitSession() : null;
+        if (visit) url.searchParams.set('damtjern_visit', visit);
+        else url.searchParams.delete('damtjern_visit');
 
         ATTRIBUTION_PARAMS.forEach((name) => url.searchParams.delete(name));
         if (decision === GRANTED) {
@@ -139,6 +166,7 @@
 
     if (decision === GRANTED) {
       startGoogleTag();
+      startVisitorTag();
       if (announce) window.dispatchEvent(new CustomEvent('damtjern:tracking-granted'));
     }
 
@@ -176,7 +204,7 @@
     banner.setAttribute('aria-labelledby', 'damtjern-consent-title');
     banner.innerHTML = `
       <h2 id="damtjern-consent-title">Personvernvalg</h2>
-      <p>Vi bruker valgfrie måle- og annonsekapsler for å se om Google-annonsene fører til bookinger. Avslag påvirker ikke nettsiden eller muligheten til å bestille. Du kan endre valget senere via «Personvernvalg».</p>
+      <p>Vi bruker valgfrie måle- og annonsekapsler for å forstå trafikk, sider som besøkes og hvor i bestillingen kunder stopper. Vi lagrer ikke navn fra anonyme besøk. Avslag påvirker ikke nettsiden eller muligheten til å bestille. Du kan endre valget senere via «Personvernvalg».</p>
       <div class="damtjern-consent-actions">
         <button type="button" data-consent="deny">Avslå</button>
         <button type="button" data-consent="grant">Godta</button>
