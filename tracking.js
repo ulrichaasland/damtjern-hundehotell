@@ -137,10 +137,10 @@
         const url = new URL(link.href, window.location.href);
         if (url.hostname !== BOOKING_HOST) return;
         if (decision) url.searchParams.set(CONSENT_PARAM, decision);
+        else url.searchParams.delete(CONSENT_PARAM);
         const visit = decision === GRANTED ? visitSession() : null;
         if (visit) url.searchParams.set('damtjern_visit', visit);
         else url.searchParams.delete('damtjern_visit');
-        else url.searchParams.delete(CONSENT_PARAM);
 
         ATTRIBUTION_PARAMS.forEach((name) => url.searchParams.delete(name));
         if (decision === GRANTED) {
